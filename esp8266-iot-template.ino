@@ -12,12 +12,18 @@ void setup(void){
   Serial.begin(115200);
   Serial.println("\nStarted");
 
+  config_setup();
+
   boolean config_reset = (digitalRead(16) == 0);
+
+  if (config_reset) {
+    config_wipe();
+  }
+  
   boolean config_ok = config_read();
 
-  if (!config_ok || config_reset) {
-    Serial.println("Resetting config");
-    config_init();      
+  if (!config_ok) {
+    Serial.println("No valid config found");
     wifi_create_ap();     
     http_initial_setup();
   } else {

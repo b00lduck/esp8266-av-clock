@@ -23,6 +23,8 @@ void config_write();
 boolean config_read();
 void config_print();
 void config_init();
+void config_wipe();
+void config_setup();
 
 extern struct strConfig config;
 

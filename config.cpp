@@ -6,6 +6,10 @@
 
 struct strConfig config;
 
+void config_setup() {
+    EEPROM.begin(EEPROM_SIZE); 
+}
+
 void config_init() {
   Serial.println("Initializing new configuration...");
   memset(&config, 0, sizeof(config));  
@@ -21,8 +25,16 @@ void config_init() {
   config_print();
 }
 
+void config_wipe() {
+  Serial.println("Purging configuration...");
+  memset(&config, 0, sizeof(config));  
+  EEPROM.put(0, "   ");
+  EEPROM.put(4, config);
+  EEPROM.commit();
+}
+
 void config_write() {
-  Serial.println("Writing configuration...");
+  Serial.println("Writing configuration...");  
   EEPROM.put(0, EEPROM_MAGIC);
   EEPROM.put(4, config);
   EEPROM.commit();
@@ -30,7 +42,6 @@ void config_write() {
 
 boolean config_read() {
   Serial.println("Reading configuration...");
-  EEPROM.begin(EEPROM_SIZE);  
   char magic[4];
   EEPROM.get(0, magic);
   if (strncmp(magic, EEPROM_MAGIC, 3) != 0) {
