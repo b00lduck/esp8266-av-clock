@@ -16,6 +16,7 @@ void config_init() {
   Serial.println("Initializing new configuration...");
   memset(&config, 0, sizeof(config));  
   config.use_dhcp = true;
+  sprintf(config.device_name, "ESP8266-%s", String(ESP.getChipId(), HEX).c_str());
   config_print();
 }
 

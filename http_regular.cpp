@@ -2,36 +2,42 @@
 #include "http.h"
 #include "config.h"
 
-const char* http_regular_index_html PROGMEM = R"=====(
-  <h1>ESP8266</h1>
-  <h2>Configuration</h2>
-  
-  <table>
-    <tr><td>SSID:</td><td>%s</td></tr>
-    <tr><td>PWD:</td><td>%s</td></tr>
-    <tr><td>DHCP:</td><td>%s</td></tr>
-    <tr><td>IP:</td><td>%s</td></tr>
-    <tr><td>Mask:</td><td>%s</td></tr>
-    <tr><td>Gateway:</td><td>%s</td></tr>
-    <tr><td>Device Name:</td><td>%s</td></tr>
-    <tr><td>Auto DST:</td><td>%s</td></tr>
-    <tr><td>NTP update interval:</td><td>%s</td></tr>
-    <tr><td>Timezone:</td><td>%s</td></tr>
-    <tr><td>ntp server 1:</td><td>%s</td></tr>
-    <tr><td>ntp server 2:</td><td>%s</td></tr>
-  </table>
-  
-)=====";
+String ipToString(byte ip[4]) {
+  char buf[50];
+  snprintf(buf, sizeof(buf), "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+  return String(buf);  
+}
 
 void http_regular_setup() { 
   Serial.println("Setting up HTTP server for regular config");
-  http_server.on ("/", []() {
-    Serial.println("admin.html");
-   http_server.send_P (200, "text/html", http_regular_index_html); 
-  });
 
+  http_server.on ("/", []() {
+    String s = http_read_file("/regular-config.html");
+    if (!s) {
+      http_server.send_P (500, "text/html", "Internal server error");
+      return false;
+    }
+
+    s.replace("%SSID%", config.wifi_ssid);
+    s.replace("%PWD%", config.wifi_password);
+    if (config.use_dhcp) {
+      s.replace("%DHCP%", "enabled");      
+      s.replace("%IP%", config.wifi_ssid);
+      s.replace("%MASK%", config.wifi_ssid);
+      s.replace("%GW%", config.wifi_ssid);
+    } else {
+      s.replace("%DHCP%", "disabled");      
+      s.replace("%IP%", ipToString(config.ip));
+      s.replace("%MASK%", ipToString(config.netmask));
+      s.replace("%GW%", ipToString(config.gateway));      
+    }
+    
+    s.replace("%DEVNAME%", config.device_name);
+    
+    http_server.send_P (200, "text/html", s.c_str());
+  });
+  
   http_setup();
 }
-
 
 
