@@ -3,8 +3,8 @@
 #include "config.h"
 
 String ipToString(byte ip[4]) {
-  char buf[50];
-  snprintf(buf, sizeof(buf), "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+  char buf[16];
+  snprintf(buf, sizeof(buf), "%3d.%3d.%3d.%3d", ip[0], ip[1], ip[2], ip[3]);
   return String(buf);  
 }
 
@@ -15,7 +15,7 @@ void http_regular_setup() {
     String s = http_read_file("/regular-config.html");
     if (!s) {
       http_server.send_P (500, "text/html", "Internal server error");
-      return false;
+      return;
     }
 
     s.replace("%SSID%", config.wifi_ssid);
