@@ -12,12 +12,13 @@ void http_regular_setup() {
   Serial.println("Setting up HTTP server for regular config");
 
   http_server.on ("/", []() {
-    String s = http_read_file("/regular-config.html");
-    if (!s) {
+    const char* c = http_read_file("/regular-config.html");
+    if (!c) {
       http_server.send_P (500, "text/html", "Internal server error");
       return;
     }
 
+    String s = String(c);   
     s.replace("%SSID%", config.wifi_ssid);
     s.replace("%PWD%", config.wifi_password);
     if (config.use_dhcp) {
@@ -33,7 +34,7 @@ void http_regular_setup() {
     }
     
     s.replace("%DEVNAME%", config.device_name);
-    
+   
     http_server.send_P (200, "text/html", s.c_str());
   });
   
