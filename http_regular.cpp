@@ -22,9 +22,9 @@ void http_regular_setup() {
     s.replace("%PWD%", config.wifi_password);
     if (config.use_dhcp) {
       s.replace("%DHCP%", "enabled");      
-      s.replace("%IP%", config.wifi_ssid);
-      s.replace("%MASK%", config.wifi_ssid);
-      s.replace("%GW%", config.wifi_ssid);
+      s.replace("%IP%", "AUTO");
+      s.replace("%MASK%", "AUTO");
+      s.replace("%GW%", "AUTO");
     } else {
       s.replace("%DHCP%", "disabled");      
       s.replace("%IP%", ipToString(config.ip));

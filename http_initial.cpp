@@ -3,7 +3,6 @@
 #include "http.h"
 #include "config.h"
 
-
 void http_initial_setup() {
   Serial.println("Setting up HTTP server for initial config");
 
