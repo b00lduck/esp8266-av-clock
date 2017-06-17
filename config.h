@@ -10,12 +10,6 @@ struct strConfig {
   byte netmask[4];        
   byte gateway[4];        
   char device_name[33];
-
-  // Application settings
-  boolean auto_dst;          
-  long ntp_update_interval;
-  long time_zone;         
-  char ntp_server[2][33];  
   
 }; 
 
@@ -28,6 +22,4 @@ void config_setup();
 
 extern struct strConfig config;
 
-void config_set_wifi_ssid(const char*);
-void config_set_wifi_password(const char*);
-
+void config_set_initial_config(const char* ssid, const char* password);
