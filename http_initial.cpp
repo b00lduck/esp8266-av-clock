@@ -5,11 +5,13 @@
 
 void http_initial_setup() {
   Serial.println("Setting up HTTP server for initial config");
+
+  SPIFFS.begin();
+  
   http_server.on("/", HTTP_GET, []() {
     Serial.println("GET / 200");
-    SPIFFS.begin();
 
-    File f = SPIFFS.open("/initial_index.html", "r");
+    File f = SPIFFS.open("/initial-index.html", "r");
     if (!f) {
       Serial.println("file open failed");
     }
