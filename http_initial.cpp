@@ -1,26 +1,14 @@
 #include <Arduino.h>
-#include "FS.h"
+
 #include "http.h"
 #include "config.h"
+
 
 void http_initial_setup() {
   Serial.println("Setting up HTTP server for initial config");
 
-  SPIFFS.begin();
-  
-  http_server.on("/", HTTP_GET, []() {
-    Serial.println("GET / 200");
+  http_install_simple_get_handler("/", "/initial-index.html");
 
-    File f = SPIFFS.open("/initial-index.html", "r");
-    if (!f) {
-      Serial.println("file open failed");
-    }
-    
-    String s = f.readString();
-    Serial.println(s);
-    
-    http_server.send_P (200, "text/html", s.c_str()); 
-  });
   /*
   http_server.on("/", HTTP_POST, []() {
     Serial.println("POST /init 200");       
