@@ -16,21 +16,21 @@ void http_setup() {
   http_server.begin();  
 }
 
-String http_read_file(char* filename) {
+const char* http_read_file(char* filename) {
   File f = SPIFFS.open(filename, "r");
   if (!f) {
-    return (String)NULL;
+    return NULL;
   }
-  return f.readString();
+  return f.readString().c_str();
 }
 
 boolean http_send_file(char* filename) {
-  String s = http_read_file(filename);
-  if (!s) {
+  const char* c = http_read_file(filename);
+  if (!c) {
     http_server.send_P (500, "text/html", "Internal server error");
     return false;
   }
-  http_server.send_P (200, "text/html", s.c_str());
+  http_server.send_P (200, "text/html", c);
   return true;
 }
 

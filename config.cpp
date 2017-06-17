@@ -54,6 +54,7 @@ boolean config_read() {
 
 // Save initial config
 void config_set_initial_config(const char* ssid, const char* password) {
+  config_init();
   strncpy(config.wifi_ssid, ssid, 32);
   strncpy(config.wifi_password, password, 32);
   config_write();
