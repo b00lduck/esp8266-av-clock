@@ -30,7 +30,36 @@ const char REGULAR_CONFIG_HTML[] = R"=====(
             crossorigin="anonymous"></script>
     <script>
       $(function() {
-        console.log( "ready!" );
+        if ($('#dhcpbox').is(":checked")) {  
+          $("#iprow").hide();
+          $("#maskrow").hide();
+          $("#gwrow").hide();
+        }
+      
+        $("#dhcpbox").on("change", function(e) {
+          if (e.target.checked !== true) {
+            $("#iprow").show();
+            $("#maskrow").show();
+            $("#gwrow").show();
+          } else {
+            $("#iprow").hide();
+            $("#maskrow").hide();
+            $("#gwrow").hide();  
+          }
+        });
+      
+        $("#devpass").hide();
+        $("#wifipass").hide();        
+        $("#devpassbox").on("click", function(e) {
+          $("#devpass").show();
+          $("#devpassbox").hide();
+        });
+        
+        $("#wifipassbox").on("click", function(e) {        
+          $("#wifipass").show();
+          $("#wifipassbox").hide();
+        });
+        
       });
     </script>
   </head>
@@ -41,30 +70,33 @@ const char REGULAR_CONFIG_HTML[] = R"=====(
       <table>
         <tr><td colspan="2"><b>Device config:</b><td></tr>
         <tr><td>Device name:</td><td><input name="devname" value="%DEVNAME%" maxlength="32" required></td></tr>
-        <tr><td>Device password:</td><td><input name="devpass" type="password" value="secret" maxlength="32"> <input name="changedevpass" type="checkbox" value="1"> check to change password</td></tr>
-
-        <tr><td colspan="2"><b>WiFi config:</b><td></tr>
+        <tr><td>Device password:</td><td>
+          <input id="devpass" name="devpass" type="password" value="" maxlength="32">
+          <input type="button" id="devpassbox" name="changedevpass" value="click to change device password"></td></tr>
+        <tr><td colspan="2"><br><b>WiFi config:</b><td></tr>
         <tr><td>SSID:</td><td><input name="ssid" value="%SSID%" maxlength="32" required></td></tr>      
-        <tr><td>WiFi password:</td><td><input name="wifipass" type="password" value="secret" maxlength="32"> <input name="changewifipass" type="checkbox" value="1"> check to change password</td></tr>
-        
-        <tr><td colspan="2"><b>Network config (IP settings only used in non-DHCP mode)</b><td></tr>
-        <tr><td>DHCP:</td><td><input name="dhcp" type="checkbox" value="1" %DHCP%></td></tr>        
-        <tr><td>IP:</td><td>
+        <tr><td>WiFi password:</td><td>
+          <input id="wifipass" name="wifipass" type="password" value="" maxlength="32"> 
+          <input type="button" id="wifipassbox" value="click to change WiFi password"></td></tr>        
+        <tr><td colspan="2"><br><b>Network config</b><td></tr>
+        <tr><td>DHCP:</td><td><input id="dhcpbox" name="dhcp" type="checkbox" value="1" %DHCP%></td></tr>        
+        <tr id="iprow"><td>IP:</td><td>
           <input name="ip1" type="number" value="%MASK1%" min="0" max="255" width="50">.
           <input name="ip2" type="number" value="%MASK2%" min="0" max="255" width="50">.
           <input name="ip3" type="number" value="%MASK3%" min="0" max="255" width="50">.
           <input name="ip4" type="number" value="%MASK4%" min="0" max="255" width="50"></td></tr>
-        <tr><td>Mask:</td><td>
+        <tr id="maskrow"><td>Mask:</td><td>
           <input name="mask1" type="number" value="%MASK1%" min="0" max="255" width="50">.
           <input name="mask2" type="number" value="%MASK2%" min="0" max="255" width="50">.
           <input name="mask3" type="number" value="%MASK3%" min="0" max="255" width="50">.
           <input name="mask4" type="number" value="%MASK4%" min="0" max="255" width="50"></td></tr>
-        <tr><td>Gateway:</td><td>          
+        <tr id="gwrow"><td>Gateway:</td><td>          
           <input name="gw1" type="number" value="%GW1%" min="0" max="255" width="50">.
           <input name="gw2" type="number" value="%GW2%" min="0" max="255" width="50">.
           <input name="gw3" type="number" value="%GW3%" min="0" max="255" width="50">.
           <input name="gw4" type="number" value="%GW4%" min="0" max="255" width="50"></td></tr>
       </table>
+      <br>
       <input type="submit" value="save configuration and reboot">
     </form>
     <form action="/" method="GET">
@@ -108,9 +140,9 @@ void http_regular_setup() {
     
     config_set_regular_config(
       http_server.arg("ssid").c_str(), 
-      http_server.arg("changewifipass") == "1" ? http_server.arg("wifipass").c_str() : config.wifi_password, 
+      http_server.arg("changewifipass") == "" ? http_server.arg("wifipass").c_str() : config.wifi_password, 
       http_server.arg("devname").c_str(), 
-      http_server.arg("changedevpass") == "1" ? http_server.arg("devpass").c_str() : config.device_password);  
+      http_server.arg("changedevpass") == "" ? http_server.arg("devpass").c_str() : config.device_password);  
   });
   
   http_setup();
