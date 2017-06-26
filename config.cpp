@@ -49,7 +49,7 @@ boolean config_read() {
   EEPROM.get(4,config);
   // TODO: CRC check
   config_print();
-  return true;  
+  return true;
 }
 
 // Save initial config
@@ -60,16 +60,30 @@ void config_set_initial_config(const char* ssid, const char* password) {
   config_write();
 }
 
+// Save initial config
+void config_set_regular_config(const char* wifi_ssid, const char* wifi_password, const char* device_name, const char* device_password) { 
+        
+  Serial.println(device_password);
+    
+  strncpy(config.wifi_ssid, wifi_ssid, 32);
+  strncpy(config.wifi_password, wifi_password, 32);
+  strncpy(config.device_name, device_name, 32);
+  strncpy(config.device_password, device_password, 32);
+  
+  config_print();
+}
+
 // Write current config to serial console
 void config_print() {
   Serial.println("Current configuration:");
   Serial.printf("SSID:               %s\n", config.wifi_ssid);
-  Serial.printf("PWD:                %s\n", config.wifi_password); 
+  Serial.printf("WiFi password:      %s\n", config.wifi_password); 
   Serial.printf("DHCP:               %d\n", config.use_dhcp);
   Serial.printf("IP:                 %d.%d.%d.%d\n", config.ip[0],config.ip[1],config.ip[2],config.ip[3]);
   Serial.printf("Mask:               %d.%d.%d.%d\n", config.netmask[0],config.netmask[1],config.netmask[2],config.netmask[3]);
   Serial.printf("Gateway:            %d.%d.%d.%d\n", config.gateway[0],config.gateway[1],config.gateway[2],config.gateway[3]);
-  Serial.printf("Device Name:        %s\n", config.device_name);
+  Serial.printf("Device name:        %s\n", config.device_name);
+  Serial.printf("Device password:    %s\n", config.device_password);
   Serial.println("");
 }
 

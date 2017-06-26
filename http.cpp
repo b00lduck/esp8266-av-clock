@@ -16,32 +16,11 @@ void http_setup() {
   http_server.begin();  
 }
 
-const char* http_read_file(char* filename) {
-  File f = SPIFFS.open(filename, "r");
-  if (!f) {
-    return NULL;
-  }
-  return f.readString().c_str();
-}
-
-boolean http_send_file(char* filename) {
-  const char* c = http_read_file(filename);
-  if (!c) {
-    http_server.send_P (500, "text/html", "Internal server error");
-    return false;
-  }
-  http_server.send_P (200, "text/html", c);
-  return true;
-}
-
-void http_install_simple_get_handler(char* path, char* filename) {
-  http_server.on(path, HTTP_GET, [filename]() {
-    Serial.printf("GET %s -> ");
-    if (http_send_file(filename)) {
-      Serial.printf("200\n");
-    } else {
-      Serial.printf("500\n");
-    }
+void http_install_simple_get_handler_cstr(const char* path, const char* cstr) {
+  http_server.on(path, HTTP_GET, [cstr]() {
+    Serial.printf("GET %s -> 200");
+    http_server.send_P (200, "text/html", cstr);
   });
 }
+
 
