@@ -1,5 +1,5 @@
 #include <ESP8266WebServer.h>
-#include "assets/jquery-3.2.1.slim.min.js.gz.h"
+#include "assets/jquery-3.2.1.min.js.gz.h"
 #include "http.h"
 #include "macros.h"
 
@@ -21,7 +21,7 @@ void http_setup() {
     http_server.send(404, TEXT_HTML, F("<h1>404</h1>not found"));
   });
 
-  http_server.on(FSTR("/assets/jquery-3.2.1.slim.min.js"), HTTP_GET, []() {    
+  http_server.on(FSTR("/assets/jquery-3.2.1.min.js"), HTTP_GET, []() {    
     http_server.sendHeader(F("Content-Encoding"), F("gzip"));
     http_server.send_P(200, APPLICATION_JAVASCRIPT, asset_jquery, ASSET_JQUERY_LEN);
   });

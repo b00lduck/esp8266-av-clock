@@ -81,14 +81,46 @@ const char REGULAR_CONFIG_HTML[] PROGMEM = R"=====(
 <html>
   <head>
     <meta charset="utf-8"/>
-    <script src="/assets/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+    <script src="/assets/jquery-3.2.1.min.js"></script>
     <script>
       $(function() {
-        if ($('#dhcpbox').is(":checked")) {  
-          $("#iprow").hide();
-          $("#maskrow").hide();
-          $("#gwrow").hide();
-        }
+
+        $.getJSON("config.json", function( data ) {
+          if (data.use_dhcp) {  
+            $("#dhcpbox").prop("checked", true);
+            $("#iprow").hide();
+            $("#maskrow").hide();
+            $("#gwrow").hide();
+          } else {
+            $("#dhcpbox").prop("checked", false);
+            $("#iprow").show();
+            $("#maskrow").show();
+            $("#gwrow").show();            
+          }
+
+          $("input[name='ssid']").val(data.wifi_ssid);
+          $("input[name='devname']").val(data.device_name);
+
+          var ipsplit = data.ip.split(".");
+          var gwsplit = data.gw.split(".");
+          var masksplit = data.mask.split(".");
+
+          $("input[name='ip1']").val(ipsplit[0]);
+          $("input[name='ip2']").val(ipsplit[1]);
+          $("input[name='ip3']").val(ipsplit[2]);
+          $("input[name='ip4']").val(ipsplit[3]); 
+                   
+          $("input[name='gw1']").val(gwsplit[0]);
+          $("input[name='gw2']").val(gwsplit[1]);
+          $("input[name='gw3']").val(gwsplit[2]);
+          $("input[name='gw4']").val(gwsplit[3]);          
+
+          $("input[name='mask1']").val(masksplit[0]);          
+          $("input[name='mask2']").val(masksplit[1]);
+          $("input[name='mask3']").val(masksplit[2]);
+          $("input[name='mask4']").val(masksplit[3]);          
+          
+        });
       
         $("#dhcpbox").on("change", function(e) {
           if (e.target.checked !== true) {
@@ -122,32 +154,32 @@ const char REGULAR_CONFIG_HTML[] PROGMEM = R"=====(
     <form action="/config" method="POST">
       <table>
         <tr><td colspan="2"><b>Device config:</b><td></tr> 
-        <tr><td>Device name:</td><td><input name="devname" value="%DEVNAME%" maxlength="32" required></td></tr>
+        <tr><td>Device name:</td><td><input name="devname" maxlength="32" required></td></tr>
         <tr><td>Device password:</td><td>
           <input id="devpass" name="devpass" type="password" value="" maxlength="32">
           <input type="button" id="devpassbox" name="changedevpass" value="click to change device password"></td></tr>
         <tr><td colspan="2"><br><b>WiFi config:</b><td></tr>
-        <tr><td>SSID:</td><td><input name="ssid" value="%SSID%" maxlength="32" required></td></tr>      
+        <tr><td>SSID:</td><td><input name="ssid" maxlength="32" required></td></tr>      
         <tr><td>WiFi password:</td><td>
           <input id="wifipass" name="wifipass" type="password" value="" maxlength="32"> 
           <input type="button" id="wifipassbox" value="click to change WiFi password"></td></tr>        
         <tr><td colspan="2"><br><b>Network config</b><td></tr>
-        <tr><td>DHCP:</td><td><input id="dhcpbox" name="dhcp" type="checkbox" value="1" %DHCP%></td></tr>        
+        <tr><td>DHCP:</td><td><input id="dhcpbox" name="dhcp" type="checkbox" value="1"></td></tr>        
         <tr id="iprow"><td>IP:</td><td>
-          <input name="ip1" type="number" value="%MASK1%" min="0" max="255" width="50">.
-          <input name="ip2" type="number" value="%MASK2%" min="0" max="255" width="50">.
-          <input name="ip3" type="number" value="%MASK3%" min="0" max="255" width="50">.
-          <input name="ip4" type="number" value="%MASK4%" min="0" max="255" width="50"></td></tr>
+          <input name="ip1" type="number" min="0" max="255" width="50">.
+          <input name="ip2" type="number" min="0" max="255" width="50">.
+          <input name="ip3" type="number" min="0" max="255" width="50">.
+          <input name="ip4" type="number" min="0" max="255" width="50"></td></tr>
         <tr id="maskrow"><td>Mask:</td><td>
-          <input name="mask1" type="number" value="%MASK1%" min="0" max="255" width="50">.
-          <input name="mask2" type="number" value="%MASK2%" min="0" max="255" width="50">.
-          <input name="mask3" type="number" value="%MASK3%" min="0" max="255" width="50">.
-          <input name="mask4" type="number" value="%MASK4%" min="0" max="255" width="50"></td></tr>
+          <input name="mask1" type="number" min="0" max="255" width="50">.
+          <input name="mask2" type="number" min="0" max="255" width="50">.
+          <input name="mask3" type="number" min="0" max="255" width="50">.
+          <input name="mask4" type="number" min="0" max="255" width="50"></td></tr>
         <tr id="gwrow"><td>Gateway:</td><td>          
-          <input name="gw1" type="number" value="%GW1%" min="0" max="255" width="50">.
-          <input name="gw2" type="number" value="%GW2%" min="0" max="255" width="50">.
-          <input name="gw3" type="number" value="%GW3%" min="0" max="255" width="50">.
-          <input name="gw4" type="number" value="%GW4%" min="0" max="255" width="50"></td></tr>      
+          <input name="gw1" type="number" min="0" max="255" width="50">.
+          <input name="gw2" type="number" min="0" max="255" width="50">.
+          <input name="gw3" type="number" min="0" max="255" width="50">.
+          <input name="gw4" type="number" min="0" max="255" width="50"></td></tr>      
       </table>
       <br>
       <input type="submit" value="save configuration and reboot">
@@ -169,13 +201,13 @@ void http_regular_setup() {
   http_server.on (FSTR("/config.json"), HTTP_GET, []() {    
     char json[300];
     sprintf((char*)&json, 
-      FSTR("{\"wifi_ssid\": \"%32s\", \"use_dhcp\": \"%4s\", \"device_name\": \"%32s\", \"ip\": \"%15s\", \"mask\": \"%15s\", \"gw\": \"%15s\"}"),
+      FSTR("{\"wifi_ssid\": \"%s\", \"use_dhcp\": %s, \"device_name\": \"%s\", \"ip\": \"%s\", \"mask\": \"%s\", \"gw\": \"%s\"}"),
       config.wifi_ssid,
       config.use_dhcp ? FSTR("true") : FSTR("false"),
       config.device_name,
-      String(WiFi.localIP()).c_str(),
-      String(WiFi.subnetMask()).c_str(),
-      String(WiFi.gatewayIP()).c_str());
+      WiFi.localIP().toString().c_str(),
+      WiFi.subnetMask().toString().c_str(),
+      WiFi.gatewayIP().toString().c_str());
 
     http_server.send(200, APPLICATION_JSON, json);
 
