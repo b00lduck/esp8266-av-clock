@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "app_config.h"
 
 struct strConfig {
 
@@ -11,7 +12,9 @@ struct strConfig {
   byte gateway[4];        
   char device_name[33];
   char device_password[33];
-  
+
+  strAppConfig app_config;
+    
 }; 
 
 void config_write();

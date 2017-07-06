@@ -1,29 +1,30 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include "config.h"
+#include "app_config.h"
+#include "macros.h"
 
+// create AP for initial configuration
 void wifi_create_ap() {
-
   char ssid[32];
-
-  sprintf(ssid, "ESP8266-%s", String(ESP.getChipId(), HEX).c_str());
+  sprintf(ssid, FSTR("ESP8266-%s"), String(ESP.getChipId(), HEX).c_str());
  
-  Serial.printf("Creating AP with SSID \"%s\"\n", ssid);
+  Serial.printf(FSTR("Creating AP with SSID \"%s\"\n"), ssid);
 
   WiFi.mode(WIFI_AP);  
   WiFi.softAPConfig(
     IPAddress(192, 168, 100, 1),      
     IPAddress(192, 168, 100, 254), 
     IPAddress(255, 255, 255, 0));
-  WiFi.softAP(ssid);
+  WiFi.softAP(ssid, INITIAL_AP_PASSWORD);
 
-  Serial.printf("Created AP with SSID \"%s\" and IPv4 address ", ssid);
+  Serial.printf(FSTR("Created AP with SSID \"%s\", password \"%s\" and IPv4 address "), ssid, INITIAL_AP_PASSWORD);
   Serial.println(WiFi.softAPIP());
 }
 
-
+// connect to AP for regular operation
 void wifi_connect() {
-  Serial.printf("Connecting to SSID \"%s\"...\n", config.wifi_ssid);
+  Serial.printf(FSTR("Connecting to SSID \"%s\"...\n"), config.wifi_ssid);
   
   WiFi.begin(config.wifi_ssid, config.wifi_password);
 
@@ -39,7 +40,7 @@ void wifi_connect() {
       IPAddress(config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]));
   }
   
-  Serial.printf("\nConnected to SSID \"%s\" with IPv4 address ", config.wifi_ssid);
+  Serial.printf(FSTR("\nConnected to SSID \"%s\" with IPv4 address "), config.wifi_ssid);
   Serial.println(WiFi.localIP());
 }
 
