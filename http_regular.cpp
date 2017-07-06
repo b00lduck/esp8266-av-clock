@@ -72,7 +72,8 @@ const char REGULAR_CONFIG_RESPONSE_HTML[] PROGMEM = R"=====(
   </head>
   <body>
     <h1>ESP8266</h1>
-    <h2>Device configuration successfully updated<h2>
+    <h2>Device configuration successfully updated</h2>
+    Please wait for the device to be rebooted.
   </body>
 </html>
 )=====";      
@@ -194,11 +195,15 @@ const char REGULAR_CONFIG_HTML[] PROGMEM = R"=====(
 void http_regular_setup() { 
   Serial.println(F("Setting up HTTP server for regular config"));
 
+  // "/" endpoint
   http_server.on ("/", []() {
+    HTTP_AUTH
     http_server.send_P (200, TEXT_HTML, REGULAR_INDEX_HTML);
   });
-  
+
+  // "/config.json" GET endpoint
   http_server.on (FSTR("/config.json"), HTTP_GET, []() {    
+    HTTP_AUTH
     char json[300];
     sprintf((char*)&json, 
       FSTR("{\"wifi_ssid\": \"%s\", \"use_dhcp\": %s, \"device_name\": \"%s\", \"ip\": \"%s\", \"mask\": \"%s\", \"gw\": \"%s\"}"),
@@ -212,33 +217,67 @@ void http_regular_setup() {
     http_server.send(200, APPLICATION_JSON, json);
 
   });
-  
+
+  // "/config" GET endpoint
   http_server.on (FSTR("/config"), HTTP_GET, []() {          
+    HTTP_AUTH
     http_server.send_P(200, TEXT_HTML, REGULAR_CONFIG_HTML);
   });
 
+  // "/config" POST endpoint
   http_server.on(FSTR("/config"), HTTP_POST, []() {
-    http_server.send_P (200, TEXT_HTML, REGULAR_CONFIG_RESPONSE_HTML);    
+    HTTP_AUTH
+    http_server.send_P (200, TEXT_HTML, REGULAR_CONFIG_RESPONSE_HTML);       
     config_set_regular_config(
       http_server.arg(FSTR("ssid")).c_str(), 
-      http_server.arg(FSTR("changewifipass")) == "" ? http_server.arg(FSTR("wifipass")).c_str() : config.wifi_password, 
+      http_server.arg(FSTR("changewifipass")).length() ? http_server.arg(FSTR("wifipass")).c_str() : config.wifi_password, 
       http_server.arg(FSTR("devname")).c_str(), 
-      http_server.arg(FSTR("changedevpass")) == "" ? http_server.arg(FSTR("devpass")).c_str() : config.device_password);  
+      http_server.arg(FSTR("changedevpass")).length() ? http_server.arg(FSTR("devpass")).c_str() : config.device_password,
+      http_server.arg(FSTR("dhcp")).length(),
+      atoi(http_server.arg(FSTR("ip1")).c_str()),
+      atoi(http_server.arg(FSTR("ip2")).c_str()),
+      atoi(http_server.arg(FSTR("ip3")).c_str()),
+      atoi(http_server.arg(FSTR("ip4")).c_str()),
+      atoi(http_server.arg(FSTR("gw1")).c_str()),
+      atoi(http_server.arg(FSTR("gw2")).c_str()),
+      atoi(http_server.arg(FSTR("gw3")).c_str()),
+      atoi(http_server.arg(FSTR("gw4")).c_str()),
+      atoi(http_server.arg(FSTR("mask1")).c_str()),
+      atoi(http_server.arg(FSTR("mask2")).c_str()),
+      atoi(http_server.arg(FSTR("mask3")).c_str()),
+      atoi(http_server.arg(FSTR("mask4")).c_str())      
+    );
+    Serial.println("Now rebooting");
+    ESP.restart();
   });
 
+  // "/app_config" GET endpoint
   http_server.on (FSTR("/app_config"), HTTP_GET, []() {    
-    app_config_send_config_page(&config.app_config);   
+    HTTP_AUTH
+    http_server.send_P(200, TEXT_HTML, APP_CONFIG_HTML);
   });
 
+  // "/app_config" POST endpoint
   http_server.on (FSTR("/app_config"), HTTP_POST, []() {
-    app_config_send_response_page(&config.app_config);   
+    HTTP_AUTH
+    app_config_persist();   
+    http_server.send_P(200, TEXT_HTML, APP_CONFIG_RESPONSE_HTML);
+    Serial.println("Now rebooting");
+    ESP.restart();
   });  
 
+  // "/app_config.json" GET endpoint
+  http_server.on (FSTR("/app_config.json"), HTTP_GET, []() {
+    HTTP_AUTH
+    app_config_send_json();  
+  });
+
   http_server.on(FSTR("/update"), HTTP_GET, []() {
+    HTTP_AUTH
     http_server.send_P (200, TEXT_HTML, REGULAR_UPDATE_HTML);
   });  
 
-  http_server.on(FSTR("/update"), HTTP_POST, []() {
+  http_server.on(FSTR("/update"), HTTP_POST, []() {      
       http_server.sendHeader(FSTR("Connection"), FSTR("close"));
       if (Update.hasError()) {
         http_server.send_P(500, TEXT_HTML, REGULAR_UPDATE_FAIL_HTML);  
@@ -247,6 +286,7 @@ void http_regular_setup() {
         ESP.restart();  
       }
     },[]() {
+      HTTP_AUTH
       HTTPUpload& upload = http_server.upload();    
       if(upload.status == UPLOAD_FILE_START) {
         Serial.printf(FSTR("Update: %s\n"), upload.filename.c_str());

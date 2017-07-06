@@ -6,3 +6,5 @@ void http_handle();
 
 void http_install_simple_get_handler_cstr(const char* path, const char* cstr);
 
+#define HTTP_AUTH {if(!http_server.authenticate(ADMIN_USERNAME, config.device_password)) return http_server.requestAuthentication();}
+

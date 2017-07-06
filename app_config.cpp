@@ -11,7 +11,8 @@ const char APP_CONFIG_RESPONSE_HTML[] PROGMEM = R"=====(
   </head>
   <body>
     <h1>ESP8266</h1>
-    <h2>Application configuration successfully updated<h2>
+    <h2>Application configuration successfully updated</h2>
+    Please wait for the device to be rebooted.
   </body>
 </html>
 )=====";
@@ -23,6 +24,9 @@ const char APP_CONFIG_HTML[] PROGMEM = R"=====(
     <script src="/assets/jquery-3.2.1.min.js"></script>  
     <script>
       $(function() {
+        $.getJSON("app_config.json", function( data ) {
+          $("input[name='iscoolbox']").prop("checked", data.is_cool_app);         
+        });        
       });
     </script>
   </head>
@@ -32,7 +36,7 @@ const char APP_CONFIG_HTML[] PROGMEM = R"=====(
     <form action="/app_config" method="POST">
       <table>
         <tr><td colspan="2"><b>Generic application settings:</b><td></tr>
-        <tr><td>Application is cool:</td><td><input id="iscoolbox" name="iscoolbox" type="checkbox" value="1" %ISCOOL%></td></tr>
+        <tr><td>Application is cool:</td><td><input name="iscoolbox" type="checkbox" value="1"></td></tr>
       </table>
       <br>
       <input type="submit" value="save configuration and reboot">
@@ -44,26 +48,28 @@ const char APP_CONFIG_HTML[] PROGMEM = R"=====(
 </html>
 )=====";    
 
-void app_config_init(strAppConfig *appConfig) {
-  // set default settings here
-  appConfig->isCoolApp = true;
+// set application default settings
+void app_config_init() {  
+  config.app_config.is_cool_app = true;
 }
 
-void app_config_print(strAppConfig *appConfig) {
-  // print settings for debugging purposes
-  Serial.printf(FSTR("isCoolApp:      %s\n"), appConfig->isCoolApp ? FSTR("true") : FSTR("false"));  
+// print application settings for debugging purposes
+void app_config_print() {  
+  Serial.printf(FSTR("isCoolApp:      %s\n"), config.app_config.is_cool_app ? FSTR("true") : FSTR("false"));  
 }
 
-void app_config_send_config_page(strAppConfig *appConfig) {
-  String s = String(APP_CONFIG_HTML);
-  bool isCool = appConfig->isCoolApp;
-  s.replace(FSTR("%ISCOOL%"), isCool ? FSTR("checked=\"checked\"") : FSTR(""));      
-  http_server.send_P (200, TEXT_HTML, s.c_str());
+// send application config as JSON
+void app_config_send_json() {
+  char json[50];
+  sprintf((char*)&json, 
+    FSTR("{\"is_cool_app\": %s}"),
+    config.app_config.is_cool_app ? FSTR("true") : FSTR("false"));
+  http_server.send(200, APPLICATION_JSON, json);
 }
 
-void app_config_send_response_page(strAppConfig *appConfig) {
-  http_server.send_P (200, TEXT_HTML, APP_CONFIG_RESPONSE_HTML);
-  appConfig->isCoolApp = http_server.arg(FSTR("iscoolbox")) == FSTR("1");
+// persist application settings
+void app_config_persist() {
+  config.app_config.is_cool_app = http_server.arg(FSTR("iscoolbox")) == FSTR("1");
   config_write();
 }
 

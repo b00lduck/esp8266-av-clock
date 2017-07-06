@@ -15,7 +15,7 @@ void wifi_create_ap() {
   WiFi.softAPConfig(
     IPAddress(192, 168, 100, 1),      
     IPAddress(192, 168, 100, 254), 
-    IPAddress(255, 255, 255, 0));
+    IPAddress(255, 255, 255, 0));  
   WiFi.softAP(ssid, INITIAL_AP_PASSWORD);
 
   Serial.printf(FSTR("Created AP with SSID \"%s\", password \"%s\" and IPv4 address "), ssid, INITIAL_AP_PASSWORD);
