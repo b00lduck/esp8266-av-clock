@@ -1,7 +1,4 @@
-#pragma once
-#include <Arduino.h>
-
-#define EEPROM_MAGIC "B00"
+#define EEPROM_MAGIC "AV0"
 #define INITIAL_AP_PASSWORD "1337"
 #define ADMIN_USERNAME "admin"
 
@@ -15,7 +12,10 @@ void app_config_send_json();
 
 // application settings
 struct strAppConfig {  
-  bool is_cool_app;    
+  bool auto_dst;
+  long ntp_update_interval;
+  long time_zone;
+  char ntp_server[32];
 }; 
 
 

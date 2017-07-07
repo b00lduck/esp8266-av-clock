@@ -1,7 +1,6 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include "config.h"
-#include "app_config.h"
 #include "macros.h"
 
 // create AP for initial configuration
