@@ -1,6 +1,5 @@
-#include "config.h"
-#include "app_config.h"
 #include <EEPROM.h>
+#include "config.h"
 #include "macros.h"
 
 #define EEPROM_SIZE 512

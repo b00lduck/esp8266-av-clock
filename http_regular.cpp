@@ -234,19 +234,18 @@ void http_regular_setup() {
       http_server.arg(FSTR("devname")).c_str(), 
       http_server.arg(FSTR("changedevpass")).length() ? http_server.arg(FSTR("devpass")).c_str() : config.device_password,
       http_server.arg(FSTR("dhcp")).length(),
-      atoi(http_server.arg(FSTR("ip1")).c_str()),
-      atoi(http_server.arg(FSTR("ip2")).c_str()),
-      atoi(http_server.arg(FSTR("ip3")).c_str()),
-      atoi(http_server.arg(FSTR("ip4")).c_str()),
-      atoi(http_server.arg(FSTR("gw1")).c_str()),
-      atoi(http_server.arg(FSTR("gw2")).c_str()),
-      atoi(http_server.arg(FSTR("gw3")).c_str()),
-      atoi(http_server.arg(FSTR("gw4")).c_str()),
-      atoi(http_server.arg(FSTR("mask1")).c_str()),
-      atoi(http_server.arg(FSTR("mask2")).c_str()),
-      atoi(http_server.arg(FSTR("mask3")).c_str()),
-      atoi(http_server.arg(FSTR("mask4")).c_str())      
-    );
+      http_server.arg(FSTR("ip1")).toInt(),
+      http_server.arg(FSTR("ip2")).toInt(),
+      http_server.arg(FSTR("ip3")).toInt(),
+      http_server.arg(FSTR("ip4")).toInt(),
+      http_server.arg(FSTR("gw1")).toInt(),
+      http_server.arg(FSTR("gw2")).toInt(),
+      http_server.arg(FSTR("gw3")).toInt(),
+      http_server.arg(FSTR("gw4")).toInt(),
+      http_server.arg(FSTR("mask1")).toInt(),
+      http_server.arg(FSTR("mask2")).toInt(),
+      http_server.arg(FSTR("mask3")).toInt(),
+      http_server.arg(FSTR("mask4")).toInt());
     Serial.println("Now rebooting");
     ESP.restart();
   });
