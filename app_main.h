@@ -1,4 +1,4 @@
 void app_setup();
-void app_connecing();
+void app_connecting();
 void app_connected();
 void app_loop();
