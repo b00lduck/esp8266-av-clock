@@ -23,6 +23,12 @@ void app_setup() {
   Serial.printf("%d\n", rtc_update_by_ntp());
 }
 
+void app_connecting() {  
+}
+
+void app_connected() {  
+}
+
 void app_loop() {
   if (tickOccured == true) {
     rtc_tick();

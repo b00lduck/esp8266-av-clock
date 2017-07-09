@@ -20,16 +20,19 @@ void setup(void){
     config_wipe();
   }
 
+  app_setup();
+
   // try to read config
   boolean config_ok = config_read();
   if (!config_ok) {
     Serial.println(F("No valid config found"));
     wifi_create_ap();     
     http_initial_setup();
-  } else {
+  } else {    
+    app_connecting();
     wifi_connect();  
+    app_connected();
     http_regular_setup();
-    app_setup();
   } 
 }
 
