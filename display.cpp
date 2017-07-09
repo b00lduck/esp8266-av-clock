@@ -50,7 +50,7 @@ void sendData(byte sda, byte address, byte brightness, byte *display_data) {
   byte ret = Wire.endTransmission();
   if (ret != 0) {
     Serial.printf("I2C Error code: %d\n", ret);
-    delay(50);
+    delay(250);
   }
 
 }
@@ -149,5 +149,6 @@ void display_send() {
   sendData(2, 0x39, input_get_brightness_digits(), display_ram_raw + 12);
   sendData(2, 0x3A, input_get_brightness_digits(), display_ram_raw + 16);
 }
+
 
 

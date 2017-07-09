@@ -71,11 +71,12 @@ void app_config_print() {
 
 // send application config as JSON
 void app_config_send_json() {
-  char json[50];
+  char json[150];
   sprintf((char*)&json, 
     FSTR("{\"auto_dst\": %s,\"ntp_update_interval\": %d, \"time_zone\": %d, \"ntp_server_name\": \"%s\"}"),
     config.app_config.auto_dst ? FSTR("true") : FSTR("false"),
     config.app_config.ntp_update_interval,
+    config.app_config.time_zone,
     config.app_config.ntp_server);
   http_server.send(200, APPLICATION_JSON, json);
 }
@@ -88,4 +89,5 @@ void app_config_persist() {
   strncpy(config.app_config.ntp_server, http_server.arg(FSTR("ntp")).c_str(), 32);
   config_write();
 }
+
 
