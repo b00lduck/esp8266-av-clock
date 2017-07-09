@@ -20,13 +20,13 @@ void app_setup() {
   display_init();
   pinMode(led, OUTPUT);
   digitalWrite(led, 0);
-  Serial.printf("%d\n", rtc_update_by_ntp());
 }
 
 void app_connecting() {  
 }
 
 void app_connected() {  
+    Serial.printf("%d\n", rtc_update_by_ntp());
 }
 
 void app_loop() {

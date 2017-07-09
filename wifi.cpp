@@ -22,12 +22,13 @@ void wifi_create_ap() {
 }
 
 // connect to AP for regular operation
-void wifi_connect() {
+void wifi_connect(void (*callback)(void)) {
   Serial.printf(FSTR("Connecting to SSID \"%s\"...\n"), config.wifi_ssid);
   
   WiFi.begin(config.wifi_ssid, config.wifi_password);
 
   while (WiFi.status() != WL_CONNECTED) {
+    callback();
     Serial.print(".");
     delay(500);
   }
