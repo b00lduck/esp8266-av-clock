@@ -29,8 +29,7 @@ void setup(void){
     wifi_create_ap();     
     http_initial_setup();
   } else {    
-    app_connecting();
-    wifi_connect();  
+    wifi_connect(app_connecting);  
     app_connected();
     http_regular_setup();
   } 
@@ -40,6 +39,7 @@ void loop(void){
   http_handle();
   app_loop();
 }
+
 
 
 
