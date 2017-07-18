@@ -23,16 +23,18 @@ void wifi_create_ap() {
 
 // connect to AP for regular operation
 void wifi_connect(void (*callback)(void)) {
-  Serial.printf(FSTR("Connecting to SSID \"%s\"...\n"), config.wifi_ssid);
   
-  WiFi.begin(config.wifi_ssid, config.wifi_password);
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.printf(FSTR("Connecting to SSID \"%s\" with given password...\n"), config.wifi_ssid);
+    WiFi.begin(config.wifi_ssid, config.wifi_password);
+    while (WiFi.status() != WL_CONNECTED) {
+      callback();
+      delay(500);
+    }
+  } else {
+    Serial.printf(FSTR("Already connected to SSID \"%s\""), config.wifi_ssid);
+  }  
 
-  while (WiFi.status() != WL_CONNECTED) {
-    callback();
-    Serial.print(".");
-    delay(500);
-  }
-  
   if (!config.use_dhcp) {
     WiFi.config(
       IPAddress(config.ip[0], config.ip[1], config.ip[2], config.ip[3] ),  
@@ -43,5 +45,6 @@ void wifi_connect(void (*callback)(void)) {
   Serial.printf(FSTR("\nConnected to SSID \"%s\" with IPv4 address "), config.wifi_ssid);
   Serial.println(WiFi.localIP());
 }
+
 
 

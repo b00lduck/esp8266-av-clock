@@ -12,7 +12,7 @@ byte display_ram_digit_colon;
 
 byte display_ram_raw[20];
 
-byte seven[16] = {
+byte seven[17] = {
   B00111111,  // 0
   B00000110,  // 1
   B01011011,  // 2
@@ -29,6 +29,7 @@ byte seven[16] = {
   B00000000,  // d
   B00000000,  // e
   B00000000,  // f
+  0 // blank [16]
 };
 
 void sendData(byte sda, byte address, byte brightness, byte *display_data) {
@@ -49,8 +50,8 @@ void sendData(byte sda, byte address, byte brightness, byte *display_data) {
   Wire.write(data, 6);
   byte ret = Wire.endTransmission();
   if (ret != 0) {
-    Serial.printf("I2C Error code: %d\n", ret);
-    delay(250);
+    //Serial.printf("I2C Error code: %d\n", ret);
+    //delay(250);
   }
 
 }
@@ -118,7 +119,6 @@ void display_render() {
   display_ram_raw[19] = seven[display_ram_digits[3]];
 
   display_ram_raw[16] |= display_ram_digit_colon << 7;
-
 }
 
 void display_update_decimal(byte *digit, byte value) {
@@ -130,14 +130,14 @@ void display_update_decimal(byte *digit, byte value) {
 
 void display_update() {
 
-  display_update_decimal(display_ram_digits, rtc_get_hours());
-  display_update_decimal(display_ram_digits + 2, rtc_get_minutes());
-  display_update_decimal(display_ram_digits + 4, rtc_get_seconds());
+  display_update_decimal(display_ram_digits, rtc_get_hour());
+  display_update_decimal(display_ram_digits + 2, rtc_get_minute());
+  display_update_decimal(display_ram_digits + 4, rtc_get_second());
 
   display_ram_digit_colon = !rtc_get_halfstep();
 
   memset(display_ram_second_dots, 0, 60);
-  memset(display_ram_second_dots, 1, rtc_get_seconds() + 1);
+  memset(display_ram_second_dots, 1, rtc_get_second() + 1);
 
 }
 
@@ -149,6 +149,7 @@ void display_send() {
   sendData(2, 0x39, input_get_brightness_digits(), display_ram_raw + 12);
   sendData(2, 0x3A, input_get_brightness_digits(), display_ram_raw + 16);
 }
+
 
 
 

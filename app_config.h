@@ -1,5 +1,5 @@
 #define EEPROM_MAGIC "AV0"
-#define INITIAL_AP_PASSWORD "1337"
+#define INITIAL_AP_PASSWORD "13371337"
 #define ADMIN_USERNAME "admin"
 
 extern const char APP_CONFIG_RESPONSE_HTML[];
@@ -17,6 +17,7 @@ struct strAppConfig {
   long time_zone;
   char ntp_server[32];
 }; 
+
 
 
 
