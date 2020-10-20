@@ -1,12 +1,11 @@
 #include <Arduino.h>
 #include <Wire.h>
+#include "input.h"
 
-byte brightness_ring = 1;
-byte brightness_digits = 1;
-byte display_mode = 0;
+Input::Input() : brightness_ring(1), brightness_digits(1), display_mode(0) {
+}
 
-void input_receive() {
-
+void Input::receive() {
   Wire.begin(2, 5); 
   Wire.requestFrom(0x20, 1);  
   while (Wire.available()) { // slave may send less than requested
@@ -20,19 +19,17 @@ void input_receive() {
     byte c = Wire.read(); // receive a byte as character
     brightness_ring = 15 - (c >> 4);    
   }
-  // Serial.printf("Brightness ring: %d   Brightness digits: %d    Display mode: %d\n", brightness_ring, brightness_digits, display_mode); 
-
 }
 
-byte input_get_brightness_ring() {
+byte Input::get_brightness_ring() {
   return brightness_ring;
 }
 
-byte input_get_brightness_digits() {
+byte Input::get_brightness_digits() {
   return brightness_digits;
 }
 
-byte input_get_mode() {
+byte Input::get_mode() {
   return display_mode;
 }
 

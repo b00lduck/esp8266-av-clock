@@ -1,18 +1,9 @@
 #include <Arduino.h>
 #include <Wire.h>
+#include "display.h"
 #include "rtc.h"
-#include "input.h"
 
-byte display_ram_second_dots[60];
-byte display_ram_hour_dots[12];
-byte display_ram_quarter_dots[4];
-byte display_ram_digits[6];
-byte display_ram_digit_dots[2];
-byte display_ram_digit_colon;
-
-byte display_ram_raw[20];
-
-byte seven[17] = {
+const unsigned char seven[17] = {
   B00111111,  // 0
   B00000110,  // 1
   B01011011,  // 2
@@ -32,32 +23,7 @@ byte seven[17] = {
   0 // blank [16]
 };
 
-void sendData(byte sda, byte address, byte brightness, byte *display_data) {
-
-  if (brightness > 7) {
-    brightness = 7;
-  }
-
-  byte x = ((brightness & 0xf) << 4) + 7;
-  byte data[6] = {
-    0, x, display_data[0], display_data[1], display_data[2], display_data[3]
-  };
-
-  Wire.begin(sda, 5);
-
-  Wire.beginTransmission(address);
-
-  Wire.write(data, 6);
-  byte ret = Wire.endTransmission();
-  if (ret != 0) {
-    //Serial.printf("I2C Error code: %d\n", ret);
-    //delay(250);
-  }
-
-}
-
-// Initialize the display
-void display_init() {
+Display::Display() {
   memset(display_ram_second_dots, 0, sizeof(display_ram_second_dots));
   memset(display_ram_hour_dots, 0, sizeof(display_ram_hour_dots));
   memset(display_ram_quarter_dots, 0, sizeof(display_ram_quarter_dots));
@@ -69,8 +35,25 @@ void display_init() {
   memset(display_ram_quarter_dots, 1, 4);
 }
 
+void Display::sendData(byte sda, byte address, byte brightness, byte *display_data) {
+
+  if (brightness > 7) {
+    brightness = 7;
+  }
+
+  byte x = ((brightness & 0xf) << 4) + 7;
+  byte data[6] = {
+    0, x, display_data[0], display_data[1], display_data[2], display_data[3]
+  };
+
+  Wire.begin(sda, 5);
+  Wire.beginTransmission(address);
+  Wire.write(data, 6);
+  Wire.endTransmission();
+}
+
 // Transform the logical representation of the display memory to the raw display memory
-void display_render() {
+void Display::render() {
 
   memset(display_ram_raw, 0, sizeof(display_ram_raw));
 
@@ -121,35 +104,55 @@ void display_render() {
   display_ram_raw[16] |= display_ram_digit_colon << 7;
 }
 
-void display_update_decimal(byte *digit, byte value) {
+// Clear "loading ring"
+void Display::reset_loading_ring() {
+    update_decimal(display_ram_digits, 0);
+    update_decimal(display_ram_digits + 2, 0);
+    update_decimal(display_ram_digits + 4, 0);
+    display_ram_digit_colon = 0;
+    memset(display_ram_second_dots, 0, 60);  
+}
+
+// Set clockwise "loading ring"
+void Display::loading_ring_cw(unsigned char n, unsigned char brightness_ring, unsigned char brightness_digits) {
+    reset_loading_ring();
+    memset(display_ram_second_dots, 1, n);         
+    render();
+    send(brightness_ring, brightness_digits);
+}
+
+// Set counter-clockwise "loading ring"
+void Display::loading_ring_ccw(unsigned char n, unsigned char brightness_ring, unsigned char brightness_digits) {
+    reset_loading_ring();
+    memset(display_ram_second_dots + (60-n), 1, n);         
+    render();  
+    send(brightness_ring, brightness_digits);
+}
+
+// Update decimal digit
+void Display::update_decimal(byte *digit, byte value) {
   byte tens = value / 10;
   byte ones = value - (tens * 10);
   digit[0] = tens;
   digit[1] = ones;  
 }
 
-void display_update() {
-
-  display_update_decimal(display_ram_digits, rtc_get_hour());
-  display_update_decimal(display_ram_digits + 2, rtc_get_minute());
-  display_update_decimal(display_ram_digits + 4, rtc_get_second());
-
-  display_ram_digit_colon = !rtc_get_halfstep();
-
+// Set whole display by time
+void Display::update(unsigned char hour, unsigned char minute, unsigned char second, unsigned char halfstep) {
+  update_decimal(display_ram_digits, hour);
+  update_decimal(display_ram_digits + 2, minute);
+  update_decimal(display_ram_digits + 4, second);
+  display_ram_digit_colon = !halfstep;
   memset(display_ram_second_dots, 0, 60);
-  memset(display_ram_second_dots, 1, rtc_get_second() + 1);
-
+  memset(display_ram_second_dots, 1, second + 1);
 }
 
-void display_send() {
-  sendData(4, 0x38, input_get_brightness_ring(), display_ram_raw);        // IC7 (second dots + some special dots)
-  sendData(4, 0x3A, input_get_brightness_ring(), display_ram_raw + 4);    // IC6 (special dots only)
-  sendData(4, 0x3B, input_get_brightness_ring(), display_ram_raw + 8);    // IC8 (second dots only)
+// Set display registers and display data
+void Display::send(unsigned char brightness_ring, unsigned char brightness_digits) {
+  sendData(4, 0x38, brightness_ring, display_ram_raw);        // IC7 (second dots + some special dots)
+  sendData(4, 0x3A, brightness_ring, display_ram_raw + 4);    // IC6 (special dots only)
+  sendData(4, 0x3B, brightness_ring, display_ram_raw + 8);    // IC8 (second dots only)
 
-  sendData(2, 0x39, input_get_brightness_digits(), display_ram_raw + 12);
-  sendData(2, 0x3A, input_get_brightness_digits(), display_ram_raw + 16);
+  sendData(2, 0x39, brightness_digits, display_ram_raw + 12);
+  sendData(2, 0x3A, brightness_digits, display_ram_raw + 16);
 }
-
-
-
-
